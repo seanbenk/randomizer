@@ -1,23 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import io from "socket.io-client";
+import AdminScreen from "./screens/AdminScreen";
+import UserScreen from "./screens/UserScreen";
+import "./App.css";
 
 function App() {
+  const [socket, setSocket] = useState(null);
+  const [names, setNames] = useState([]);
+
+  useEffect(() => {
+    const newSocket = io(`http://localhost:3000`);
+    setSocket(newSocket);
+    return () => newSocket.close();
+  }, [setSocket]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {socket && (
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <UserScreen socket={socket} names={names} setNames={setNames} />
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminScreen socket={socket} names={names} setNames={setNames} />
+            }
+          />
+        </Routes>
+      )}
     </div>
   );
 }
